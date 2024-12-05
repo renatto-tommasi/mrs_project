@@ -69,6 +69,26 @@ class StateValidityChecker:
         col = int(np.floor((x - self.origin[0]) / self.map_resolution))
         row = int(np.floor((-self.origin[1]+y) / self.map_resolution)) 
         return (row, col)
+    
+    def grid_to_map(self, row, col):
+      """
+      Converts grid indices (row, col) to map coordinates (x, y) in the world frame.
+
+      Args:
+        row: The row index in the grid.
+        col: The column index in the grid.
+
+      Returns:
+        A tuple (x, y) representing the corresponding map coordinates.
+      """
+      # Map dimensions (center coordinates in grid units)
+      center_row = self.map_dim[0] / 2
+      center_col = self.map_dim[1] / 2
+
+      # Calculate real-world coordinates
+      x = self.origin[0] + (col + center_col - 0.5) * self.map_resolution
+      y = self.origin[1] + (center_row + row + 0.5) * self.map_resolution
+      return (x, y)
 
     def get_cell_value(self, row, col):
         """

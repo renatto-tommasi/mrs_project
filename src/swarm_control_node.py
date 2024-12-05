@@ -10,6 +10,10 @@ from nav_msgs.msg import Odometry
 from dataclasses import dataclass
 from geometry_msgs.msg import Point
 
+from svc import StateValidityChecker
+
+import math
+
 @dataclass
 class BoidState:
     pos: np.array
@@ -22,7 +26,7 @@ BEHAVIOR_COLORS = [
     (0.0, 1.0, 0.0, 1.0),  # Green Separation
     (0.0, 0.0, 1.0, 1.0),  # Blue allignment
     (1.0, 1.0, 0.0, 1.0),  # Yellow migration
-    (1.0, 0.0, 1.0, 1.0),  # Magenta
+    (1.0, 0.0, 1.0, 1.0),  # Magenta obstacle avoidance
     (0.0, 1.0, 1.0, 1.0),  # Cyan
 ]
 
@@ -44,6 +48,8 @@ class BoidController:
         self.vel = np.array([0.0,0.0]).reshape(2,1)
 
         self.migration_target = None
+
+        self.svc = StateValidityChecker()
 
         self.max_speed = 2
 
@@ -218,9 +224,46 @@ class BoidController:
         return mig_acc * np.linalg.norm(vector)**2
     
     def getObstacleAvoidance(self):
-        obs_acc = np.zeros((2,1))
+        obs_acc = np.zeros((2, 1))             # Initialize acceleration vector
+        coord = self.svc.map_to_grid(self.p_wf[0],self.p_wf[1])
+        local_map = self.get_local_neighborhood(coord)
+        obstacle_indices = np.where(local_map == 100)
+        if obstacle_indices[0].size > 0:
+            for row, col in zip(obstacle_indices[0], obstacle_indices[1]):
+                x,y = self.svc.grid_to_map(row, col)
+                vector = np.array([x,y]).reshape(2,1)
+                magnitude = np.linalg.norm(vector)
+                direction = vector / magnitude
 
+                obs_acc -= direction * 1/magnitude**2
+            obs_acc /= obstacle_indices[0].size
+
+
+        
         return obs_acc
+    
+    
+    def get_local_neighborhood(self, coordinate, radius=1):
+        """
+        Extracts the local neighborhood of a given coordinate in a 2D matrix.
+
+        Args:
+            matrix: The 2D numpy matrix.
+            coordinate: A tuple (row, col) representing the coordinate.
+            radius: The radius of the neighborhood in cells.
+
+        Returns:
+            A 2D numpy array representing the local neighborhood.
+        """
+        matrix = self.svc.map
+        radius_cell = int(radius+1 / self.svc.map_resolution)
+        row, col = coordinate
+        row_min = max(0, row - radius_cell)
+        row_max = min(matrix.shape[0], row + radius_cell)
+        col_min = max(0, col - radius_cell)
+        col_max = min(matrix.shape[1], col + radius_cell)
+
+        return np.flip(matrix[row_min:row_max, col_min:col_max], axis=0)
 
     
     def calculateVel(self, allignment_acc, cohesion_acc, separation_acc, migration_acc, obstacle_acc):

@@ -69,7 +69,7 @@ Visualization Manager:
       Marker Topic: /robot_0/velocity_marker
       Name: MarkerArray
       Namespaces:
-        velocity_arrows: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -77,7 +77,7 @@ Visualization Manager:
       Marker Topic: /robot_1/velocity_marker
       Name: MarkerArray
       Namespaces:
-        velocity_arrows: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -85,7 +85,7 @@ Visualization Manager:
       Marker Topic: /robot_2/velocity_marker
       Name: MarkerArray
       Namespaces:
-        velocity_arrows: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -93,7 +93,7 @@ Visualization Manager:
       Marker Topic: /robot_3/velocity_marker
       Name: MarkerArray
       Namespaces:
-        velocity_arrows: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -101,7 +101,7 @@ Visualization Manager:
       Marker Topic: /robot_4/velocity_marker
       Name: MarkerArray
       Namespaces:
-        velocity_arrows: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -109,7 +109,7 @@ Visualization Manager:
       Marker Topic: /robot_5/velocity_marker
       Name: MarkerArray
       Namespaces:
-        velocity_arrows: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -117,7 +117,7 @@ Visualization Manager:
       Marker Topic: /robot_6/velocity_marker
       Name: MarkerArray
       Namespaces:
-        velocity_arrows: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -125,7 +125,7 @@ Visualization Manager:
       Marker Topic: /robot_7/velocity_marker
       Name: MarkerArray
       Namespaces:
-        velocity_arrows: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -133,7 +133,7 @@ Visualization Manager:
       Marker Topic: /robot_8/velocity_marker
       Name: MarkerArray
       Namespaces:
-        velocity_arrows: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -141,7 +141,7 @@ Visualization Manager:
       Marker Topic: /robot_9/velocity_marker
       Name: MarkerArray
       Namespaces:
-        velocity_arrows: true
+        {}
       Queue Size: 100
       Value: true
   Enabled: true
@@ -188,9 +188,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.4097964763641357
+      Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 5.268576145172119
+      Yaw: 4.723564147949219
     Saved: ~
 Window Geometry:
   Displays:
@@ -208,5 +208,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 72
-  Y: 27
+  X: 316
+  Y: 226
