@@ -86,8 +86,8 @@ class StateValidityChecker:
       center_col = self.map_dim[1] / 2
 
       # Calculate real-world coordinates
-      x = self.origin[0] + (col + center_col - 0.5) * self.map_resolution
-      y = self.origin[1] + (center_row + row + 0.5) * self.map_resolution
+      x = self.origin[0] + col * self.map_resolution
+      y = self.origin[1] + row * self.map_resolution
       return (x, y)
 
     def get_cell_value(self, row, col):
