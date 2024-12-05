@@ -5,9 +5,17 @@ from dataclasses import dataclass
 import numpy as np
 
 
-def conv_quaternion_theta(q:Pose):
-            euler = tf.transformations.euler_from_quaternion([q.x, q.y, q.z, q.w])
-            return euler[2]  # Extract the yaw angle 
+def conv_quaternion_theta(q: Pose):
+    """
+    Converts a quaternion to a yaw angle and wraps it between 0 and 2*pi.
+    """
+    euler = tf.transformations.euler_from_quaternion([q.x, q.y, q.z, q.w])
+    yaw = euler[2]  # Extract the yaw angle
+
+    # Wrap the yaw angle to be within 0 and 2*pi
+    yaw = (yaw + np.pi) % (2 * np.pi) - np.pi
+
+    return yaw 
 
 @dataclass
 class BoidState:
