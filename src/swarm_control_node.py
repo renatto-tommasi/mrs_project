@@ -9,6 +9,8 @@ from visualization_msgs.msg import Marker, MarkerArray
 from nav_msgs.msg import Odometry
 from dataclasses import dataclass
 from geometry_msgs.msg import Point
+import math
+from svc import StateValidityChecker
 
 @dataclass
 class BoidState:
@@ -28,7 +30,7 @@ BEHAVIOR_COLORS = [
 
 
 class BoidController:
-    def __init__(self, id, num_of_robots, k_all=0.6, k_sep=0.2, k_coh=0.2, k_mig=0.3, k_obs=0.0001):
+    def __init__(self, id, num_of_robots, k_all=0.2, k_sep=0.3, k_coh=0.6, k_mig=0.8, k_obs=0.4):
         # Tuning Parameters
         self.k_sep = k_sep
         self.k_all = k_all
@@ -42,6 +44,7 @@ class BoidController:
         self.orientation = 0.0
         
         self.vel = np.array([0.0,0.0]).reshape(2,1)
+        self.state_checker = StateValidityChecker()
 
         self.migration_target = None
 
@@ -218,8 +221,38 @@ class BoidController:
         return mig_acc * np.linalg.norm(vector)**2
     
     def getObstacleAvoidance(self):
-        obs_acc = np.zeros((2,1))
+        obs_acc = np.zeros((2, 1))             # Initialize acceleration vector
+        obstacle_distance = 0.4                  # The maximum distance to check for obstacles (1.5 meters)
+        resolution = self.state_checker.map_resolution
+        origin = self.state_checker.origin
+        map_data = self.state_checker.map
+        map_dim = self.state_checker.map_dim
+        map_obstacle_threshold = 5                  # Threshold for considering an obstacle
+        x = self.p_wf[0]                             # Robot's current position 
+        y = self.p_wf[1]                             # Robot's current position a
+        robot_orientation = self.orientation         # Orientation of the robot
+        grid_x = int((x - origin[0]) / resolution)   # Convert to grid coordinates
+        grid_y = int((y - origin[1]) / resolution)   # Convert to grid coordinates
+        radius = int(obstacle_distance / resolution) # Radius
+        obstacle = False
+        # Iterate through the grid
+        for iy in range(grid_y - radius, grid_y + radius + 1):
+            for ix in range(grid_x - radius, grid_x + radius + 1):
+                if 0 <= ix < map_dim[1] and 0 <= iy < map_dim[0]:                      # Check if the grid point is within the map bounds
+                    if map_data[iy, ix] >= map_obstacle_threshold:  
+                        obstacle = True;    # Check if the grid cell contains an obstacle
+                        direction_x = grid_x - ix                             
+                        direction_y = grid_y - iy                           
+                        distance = math.sqrt(direction_x*2 + direction_y*2)
+                        if distance < 1e-3:
+                            distance =  1e-3 # Compute direction from robot to the obstacle
+                        obs_acc[0] += (direction_x / distance) / distance
+                        obs_acc[1] += (direction_y / distance) / distance
 
+        #if (obstacle):
+            #current_direction_factor = 0.3
+            #obs_acc[0] += current_direction_factor * self.vel[0]
+            #obs_acc[1] += current_direction_factor * self.vel[1]
         return obs_acc
 
     
