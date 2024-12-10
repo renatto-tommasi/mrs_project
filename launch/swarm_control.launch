@@ -1,0 +1,17 @@
+<launch>
+    <!-- Launch the communication node -->
+    <node 
+        name="communication_node" 
+        pkg="mrs_project" 
+        type="communication_node.py" 
+        output="screen" 
+    />
+
+    <!-- Launch the swarm control node -->
+    <node 
+        name="swarm_control_node" 
+        pkg="mrs_project" 
+        type="swarm_control_node.py" 
+        output="screen" 
+    />
+</launch>

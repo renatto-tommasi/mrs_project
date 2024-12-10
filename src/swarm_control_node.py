@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from geometry_msgs.msg import Point
 import math
 from svc import StateValidityChecker
+from mrs_project.msg import OdometryList
 
 @dataclass
 class BoidState:
@@ -61,9 +62,21 @@ class BoidController:
             if i != id:
                 rospy.Subscriber("/robot_{}/odom".format(i), Odometry, self.get_neighbors, callback_args=i)
 
+        # rospy.Subscriber("/swarm_odometry", OdometryList, self.get_odom_list)
+
         rospy.Subscriber("/move_base_simple/goal", PoseStamped, self.migratory_urge)
 
         self.dt = 0.1
+
+    def get_odom_list(self, odom_list:OdometryList):
+        # rospy.loginfo(f"I got Called")
+
+        for i, odom in enumerate(odom_list.odometry_list):
+            if odom is not None:
+                if i == self.id:
+                    self.get_odom(odom)
+                else:
+                    self.get_neighbors(odom, i)
 
     def get_odom(self, odom:Odometry):
         '''
@@ -222,11 +235,16 @@ class BoidController:
     def getObstacleAvoidance(self):
         obs_acc = np.zeros((2, 1))             # Initialize acceleration vector
         obstacle_distance = 0.4                  # The maximum distance to check for obstacles
+        origin = self.state_checker.origin
         resolution = self.state_checker.map_resolution
         map_data = self.state_checker.map
         map_dim = self.state_checker.map_dim
         map_obstacle_threshold = 5                  # Threshold for considering an obstacle
-        grid_x, grid_y = self.state_checker.map_to_grid(self.p_wf[0], self.p_wf[0])
+        x = self.p_wf[0]                             # Robot's current position 
+        y = self.p_wf[1]                             # Robot's current position a
+        robot_orientation = self.orientation         # Orientation of the robot
+        grid_x = int((x - origin[0]) / resolution)   # Convert to grid coordinates
+        grid_y = int((y - origin[1]) / resolution)
         radius = int(obstacle_distance / resolution) # Radius
         obstacle_count = 0
         # Iterate through the grid
