@@ -30,7 +30,7 @@ BEHAVIOR_COLORS = [
 
 
 class BoidController:
-    def __init__(self, id, num_of_robots, k_all=0.2, k_sep=0.3, k_coh=0.6, k_mig=0.8, k_obs=0.4):
+    def __init__(self, id, num_of_robots, k_all=0.2, k_sep=0.3, k_coh=0.6, k_mig=0.8, k_obs=2):
         # Tuning Parameters
         self.k_sep = k_sep
         self.k_all = k_all
@@ -48,7 +48,7 @@ class BoidController:
 
         self.migration_target = None
 
-        self.max_speed = 2
+        self.max_speed = 1
 
         # Publishers
         self.vel_pub = rospy.Publisher("/robot_{}/cmd_vel".format(self.id), Twist, queue_size=10)
@@ -191,10 +191,8 @@ class BoidController:
             center_of_mass /= num_neighbors + 1  # Average position of neighbors
 
         coh_acc = center_of_mass 
-
-
-
         return coh_acc
+    
     def getSeparationAcc(self):
         sep_acc = np.zeros((2,1))
         num_neighbors = len(self.neighbors)
@@ -208,6 +206,7 @@ class BoidController:
         
 
         return sep_acc
+    
     def getMigrationAcc(self):
 
         if self.migration_target is None:
@@ -222,37 +221,30 @@ class BoidController:
     
     def getObstacleAvoidance(self):
         obs_acc = np.zeros((2, 1))             # Initialize acceleration vector
-        obstacle_distance = 0.4                  # The maximum distance to check for obstacles (1.5 meters)
+        obstacle_distance = 0.4                  # The maximum distance to check for obstacles
         resolution = self.state_checker.map_resolution
-        origin = self.state_checker.origin
         map_data = self.state_checker.map
         map_dim = self.state_checker.map_dim
         map_obstacle_threshold = 5                  # Threshold for considering an obstacle
-        x = self.p_wf[0]                             # Robot's current position 
-        y = self.p_wf[1]                             # Robot's current position a
-        robot_orientation = self.orientation         # Orientation of the robot
-        grid_x = int((x - origin[0]) / resolution)   # Convert to grid coordinates
-        grid_y = int((y - origin[1]) / resolution)   # Convert to grid coordinates
+        grid_x, grid_y = self.state_checker.map_to_grid(self.p_wf[0], self.p_wf[0])
         radius = int(obstacle_distance / resolution) # Radius
-        obstacle = False
+        obstacle_count = 0
         # Iterate through the grid
         for iy in range(grid_y - radius, grid_y + radius + 1):
             for ix in range(grid_x - radius, grid_x + radius + 1):
                 if 0 <= ix < map_dim[1] and 0 <= iy < map_dim[0]:                      # Check if the grid point is within the map bounds
                     if map_data[iy, ix] >= map_obstacle_threshold:  
-                        obstacle = True;    # Check if the grid cell contains an obstacle
                         direction_x = grid_x - ix                             
                         direction_y = grid_y - iy                           
-                        distance = math.sqrt(direction_x*2 + direction_y*2)
+                        distance = math.sqrt(direction_x**2 + direction_y**2)
                         if distance < 1e-3:
                             distance =  1e-3 # Compute direction from robot to the obstacle
                         obs_acc[0] += (direction_x / distance) / distance
                         obs_acc[1] += (direction_y / distance) / distance
+                        obstacle_count += 1
+        if obstacle_count > 0:
+            obs_acc /= obstacle_count
 
-        #if (obstacle):
-            #current_direction_factor = 0.3
-            #obs_acc[0] += current_direction_factor * self.vel[0]
-            #obs_acc[1] += current_direction_factor * self.vel[1]
         return obs_acc
 
     

@@ -66,8 +66,8 @@ class StateValidityChecker:
           A tuple (row, col) representing the grid indices.
         """
         # Adjust for origin and invert y to match image coordinates
-        col = int(np.floor((x - self.origin[0]) / self.map_resolution))
-        row = int(np.floor((-self.origin[1]+y) / self.map_resolution)) 
+        col = int((x - self.origin[0]) / self.map_resolution)
+        row = int((y - self.origin[1]) / self.map_resolution) 
         return (row, col)
 
     def get_cell_value(self, row, col):
